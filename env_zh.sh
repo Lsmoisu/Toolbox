@@ -1,181 +1,98 @@
 #!/bin/bash
-# 脚本目的：设置系统语言环境为中文（zh_CN.UTF-8），解决vim中文乱码问题，并确保vim已安装，适配不同Linux发行版
+# 脚本名称：setup_locale_vim_chinese.sh
+# 功能：设置系统语言环境和Vim配置以解决中文乱码问题
+# 适用系统：Debian/Ubuntu
 
-echo "开始设置系统语言环境和vim配置以解决中文乱码问题..."
+echo "开始设置系统语言环境和Vim配置以解决中文乱码问题..."
 
-# 步骤1：检测系统类型
-echo "检测系统类型..."
-if [ -f /etc/os-release ]; then
-    . /etc/os-release
-    DISTRO=$ID
-elif [ -f /etc/redhat-release ]; then
-    DISTRO="centos"
-elif [ -f /etc/debian_version ]; then
-    DISTRO="debian"
+# 检测系统类型
+if [ -f /etc/debian_version ]; then
+    SYSTEM_TYPE="debian"
+    echo "检测到的系统类型：debian"
 else
-    echo "无法确定系统类型，脚本可能不兼容您的系统。"
+    echo "不支持的系统类型！此脚本仅适用于Debian/Ubuntu系统。"
     exit 1
 fi
-echo "检测到的系统类型：$DISTRO"
 
-# 步骤2：安装必要的语言包
+# 检查并安装语言包
 echo "检查并安装语言包..."
-case "$DISTRO" in
-    "ubuntu"|"debian")
-        if ! dpkg -l | grep -q locales; then
-            apt update
-            apt install -y locales
-        fi
-        ;;
-    "centos"|"rhel"|"fedora")
-        if ! rpm -q glibc-langpack-zh &> /dev/null; then
-            yum install -y glibc-langpack-zh || dnf install -y glibc-langpack-zh
-        fi
-        ;;
-    *)
-        echo "不支持的系统类型：$DISTRO，无法安装语言包。"
-        exit 1
-        ;;
-esac
+sudo apt update
+sudo apt install -y locales
 
-# 步骤3：生成zh_CN.UTF-8语言环境
+# 生成zh_CN.UTF-8语言环境
 echo "生成zh_CN.UTF-8语言环境..."
-case "$DISTRO" in
-    "ubuntu"|"debian")
-        if ! dpkg -l | grep -q locales; then
-            echo "locales 包未安装，正在安装..."
-            apt update
-            apt install -y locales
-        fi
-        if [ -f /etc/locale.gen ]; then
-            if ! grep -q "^zh_CN.UTF-8 UTF-8" /etc/locale.gen; then
-                sed -i 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/' /etc/locale.gen
-            fi
-            locale-gen
-        else
-            echo "错误：/etc/locale.gen 文件不存在，请手动运行 'dpkg-reconfigure locales' 配置语言环境。"
-            exit 1
-        fi
-        if ! locale -a | grep -q "zh_CN.utf8"; then
-            echo "错误：zh_CN.UTF-8 语言环境生成失败，请检查系统配置。"
-            exit 1
-        fi
-        ;;
-    *)
-        echo "不支持的系统类型：$DISTRO，无法生成语言环境。"
-        exit 1
-        ;;
-esac
+if [ -f /etc/locale.gen ]; then
+    sudo sed -i 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/' /etc/locale.gen
+else
+    sudo bash -c 'echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen'
+fi
+sudo locale-gen
 
-
-# 步骤4：设置系统默认语言环境为zh_CN.UTF-8
+# 设置系统默认语言环境为zh_CN.UTF-8
 echo "设置系统默认语言环境为zh_CN.UTF-8..."
-case "$DISTRO" in
-    "ubuntu"|"debian")
-        echo "LANG=zh_CN.UTF-8" > /etc/default/locale
-        echo "LANGUAGE=zh_CN:zh" >> /etc/default/locale
-        echo "LC_CTYPE=zh_CN.UTF-8" >> /etc/default/locale
-        sed -i '/LC_ALL/d' /etc/default/locale 2>/dev/null || true
-        ;;
-    "centos"|"rhel"|"fedora")
-        echo "LANG=zh_CN.UTF-8" > /etc/locale.conf
-        echo "LC_CTYPE=zh_CN.UTF-8" >> /etc/locale.conf
-        sed -i '/LC_ALL/d' /etc/locale.conf 2>/dev/null || true
-        ;;
-    *)
-        echo "不支持的系统类型：$DISTRO，无法设置语言环境。"
-        exit 1
-        ;;
-esac
+sudo bash -c 'echo "LANG=zh_CN.UTF-8" > /etc/default/locale'
+sudo bash -c 'echo "LANGUAGE=zh_CN:zh" >> /etc/default/locale'
+sudo bash -c 'echo "LC_CTYPE=zh_CN.UTF-8" >> /etc/default/locale'
 
-# 步骤5：更新当前会话的环境变量
+# 更新当前会话环境变量
 echo "更新当前会话环境变量..."
-unset LC_ALL 2>/dev/null || true
 export LANG=zh_CN.UTF-8
 export LANGUAGE=zh_CN:zh
 export LC_CTYPE=zh_CN.UTF-8
+unset LC_ALL
 
-# 步骤6：检查语言环境是否正确设置
+# 检查当前语言环境设置
 echo "当前语言环境设置如下："
 locale
 
-# 步骤7：检查vim是否已安装，如果未安装则进行安装
+# 检查语言环境是否可用
+echo "检查可用语言环境列表："
+locale -a
+
+# 检查vim是否已安装
 echo "检查vim是否已安装..."
-if ! command -v vim &> /dev/null; then
-    echo "vim未安装，正在安装vim..."
-    case "$DISTRO" in
-        "ubuntu"|"debian")
-            apt update
-            apt install -y vim
-            ;;
-        "centos"|"rhel"|"fedora")
-            yum install -y vim-enhanced || dnf install -y vim-enhanced
-            ;;
-        *)
-            echo "不支持的系统类型：$DISTRO，无法安装vim。"
-            exit 1
-            ;;
-    esac
-    if [ $? -eq 0 ]; then
-        echo "vim安装成功。"
-    else
-        echo "vim安装失败，请检查网络或软件源设置。"
-        exit 1
-    fi
-else
+if command -v vim &> /dev/null; then
     echo "vim已安装，跳过安装步骤。"
+else
+    echo "vim未安装，正在安装..."
+    sudo apt install -y vim
 fi
 
-# 步骤8：配置vim支持中文编码
+# 配置vim支持中文编码
 echo "配置vim支持中文编码..."
-VIMRC="/etc/vimrc"
-if [ ! -f "$VIMRC" ]; then
-    VIMRC="/etc/vim/vimrc"
-fi
+VIMRC="/etc/vim/vimrc"
 if [ -f "$VIMRC" ]; then
-    # 检查是否已配置编码设置，避免重复添加
-    if ! grep -q "set encoding=utf-8" "$VIMRC"; then
-        cat >> "$VIMRC" << 'EOF'
-
-" 设置编码为UTF-8以支持中文
-set encoding=utf-8
-set fileencoding=utf-8
-set fileencodings=ucs-bom,utf-8,cp936,gb18030,big5,euc-jp,euc-kr,latin1
-set termencoding=utf-8
-EOF
-        echo "vim编码配置已添加到 $VIMRC"
-    else
+    if grep -q "set fileencodings=utf-8" "$VIMRC"; then
         echo "vim编码配置已存在，跳过添加。"
+    else
+        sudo bash -c 'cat >> "$VIMRC" << EOF
+" 设置编码支持中文
+set fileencodings=utf-8,ucs-bom,gb18030,gbk,gb2312,cp936
+set termencoding=utf-8
+set encoding=utf-8
+EOF'
+        echo "vim编码配置已添加。"
     fi
 else
-    echo "警告：$VIMRC 文件不存在，尝试为root用户创建 ~/.vimrc"
-    echo -e "set encoding=utf-8\nset fileencoding=utf-8\nset fileencodings=ucs-bom,utf-8,cp936,gb18030,big5,euc-jp,euc-kr,latin1\nset termencoding=utf-8" > ~/.vimrc
+    echo "vim配置文件 $VIMRC 不存在，请检查vim安装。"
 fi
 
-# 步骤9：测试中文显示
+# 测试vim中文显示
 echo "测试vim中文显示..."
-echo "测试中文显示 - Test Chinese Display" > /tmp/test_chinese.txt
-echo "请在vim中打开 /tmp/test_chinese.txt 检查中文是否正常显示。"
-echo "命令：vim /tmp/test_chinese.txt"
+TEST_FILE="/tmp/test_chinese.txt"
+echo "测试中文显示 - Test Chinese Display" > "$TEST_FILE"
+echo "请在vim中打开 $TEST_FILE 检查中文是否正常显示。"
+echo "命令：vim $TEST_FILE"
 
-# 步骤10：清理
+# 清理包管理缓存
 echo "清理包管理缓存..."
-case "$DISTRO" in
-    "ubuntu"|"debian")
-        apt clean
-        ;;
-    "centos"|"rhel"|"fedora")
-        yum clean all || dnf clean all
-        ;;
-    *)
-        echo "不支持的系统类型：$DISTRO，跳过清理。"
-        ;;
-esac
+sudo apt autoremove -y
+sudo apt autoclean
 
 echo "脚本执行完成！"
 echo "注意：如果通过SSH连接，请确保终端客户端（如PuTTY、iTerm2）字符编码设置为UTF-8。"
 echo "如果中文仍显示乱码，请重新登录shell或重启系统以应用语言环境更改。"
 echo "如有问题，请提供以下信息："
 echo "1. locale 命令输出"
-echo "2. vim /tmp/test_chinese.txt 时中文是否乱码"
+echo "2. vim $TEST_FILE 时中文是否乱码"
 echo "3. 使用的终端类型（本地或SSH客户端）"

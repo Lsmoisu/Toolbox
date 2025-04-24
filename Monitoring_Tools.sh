@@ -634,15 +634,65 @@ if [ "$INSTALL_BLACKBOX" == "y" ]; then
 modules:
   http_2xx:
     prober: http
-    timeout: 5s
     http:
-      valid_status_codes: [200, 201, 202, 203, 204]
-      method: GET
+      preferred_ip_protocol: "ip4"
+  http_post_2xx:
+    prober: http
+    http:
+      method: POST
+  tcp_connect:
+    prober: tcp
+  pop3s_banner:
+    prober: tcp
+    tcp:
+      query_response:
+      - expect: "^+OK"
+      tls: true
+      tls_config:
+        insecure_skip_verify: false
+  grpc:
+    prober: grpc
+    grpc:
+      tls: true
+      preferred_ip_protocol: "ip4"
+  grpc_plain:
+    prober: grpc
+    grpc:
+      tls: false
+      service: "service1"
+  ssh_banner:
+    prober: tcp
+    tcp:
+      query_response:
+      - expect: "^SSH-2.0-"
+      - send: "SSH-2.0-blackbox-ssh-check"
+  ssh_banner_extract:
+    prober: tcp
+    timeout: 5s
+    tcp:
+      query_response:
+      - expect: "^SSH-2.0-([^ -]+)(?: (.*))?$"
+        labels:
+        - name: ssh_version
+          value: "${1}"
+        - name: ssh_comments
+          value: "${2}"
+  irc_banner:
+    prober: tcp
+    tcp:
+      query_response:
+      - send: "NICK prober"
+      - send: "USER prober prober prober :prober"
+      - expect: "PING :([^ ]+)"
+        send: "PONG ${1}"
+      - expect: "^:[^ ]+ 001"
   icmp:
+    prober: icmp
+  icmp_ttl5:
     prober: icmp
     timeout: 5s
     icmp:
-      preferred_ip_protocol: ip4
+      ttl: 5
 EOF
     if [ $? -ne 0 ]; then
         echo -e "${RED}错误：创建 Blackbox Exporter 配置文件失败！${NC}"

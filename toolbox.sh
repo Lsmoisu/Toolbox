@@ -17,11 +17,12 @@ echo -e "${BLUE}2. 安装Grafana+Prometheus+Node Exporter监控工具${NC}"
 echo -e "${BLUE}3. 安装Hysteria2代理${NC}"
 echo -e "${BLUE}4. 安装其他代理${NC}"
 echo -e "${BLUE}5. VPS测试（融合怪测评脚本）${NC}"
-echo -e "${BLUE}6. 退出${NC}"
+echo -e "${BLUE}6. 修改系统环境为中文${NC}"
+echo -e "${BLUE}7. 退出${NC}"
 echo -e "${GREEN}=========================================${NC}"
 
 # 读取用户输入
-read -p "请输入选项 (1-6): " choice
+read -p "请输入选项 (1-7): " choice
 
 case $choice in
     1)
@@ -45,10 +46,14 @@ case $choice in
         export noninteractive=true && curl -L https://raw.githubusercontent.com/oneclickvirt/ecs/master/goecs.sh -o goecs.sh && chmod +x goecs.sh && bash goecs.sh env && bash goecs.sh install && goecs
         ;;
     6)
+        echo -e "${YELLOW}正在修改系统环境为中文...${NC}"
+        bash <(curl -fsSL https://github.com/Lsmoisu/Toolbox/raw/refs/heads/main/env_zh.sh)
+        ;;
+    7)
         echo -e "${GREEN}退出工具箱，感谢使用！${NC}"
         exit 0
         ;;
     *)
-        echo -e "${RED}无效选项，请重新运行脚本并选择1-6之间的选项。${NC}"
+        echo -e "${RED}无效选项，请重新运行脚本并选择1-7之间的选项。${NC}"
         ;;
 esac

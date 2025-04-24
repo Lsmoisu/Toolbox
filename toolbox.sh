@@ -42,7 +42,7 @@ case $choice in
         ;;
     5)
         echo -e "${YELLOW}正在测试机器IP信息...${NC}"
-        curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o ecs.sh && chmod +x ecs.sh && bash ecs.sh
+        export noninteractive=true && curl -L https://raw.githubusercontent.com/oneclickvirt/ecs/master/goecs.sh -o goecs.sh && chmod +x goecs.sh && bash goecs.sh env && bash goecs.sh install && goecs
         ;;
     6)
         echo -e "${GREEN}退出工具箱，感谢使用！${NC}"

@@ -42,16 +42,23 @@ esac
 echo "生成zh_CN.UTF-8语言环境..."
 case "$DISTRO" in
     "ubuntu"|"debian")
-        if ! grep -q "^zh_CN.UTF-8 UTF-8" /etc/locale.gen; then
-            sed -i 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/' /etc/locale.gen
+        if ! dpkg -l | grep -q locales; then
+            echo "locales 包未安装，正在安装..."
+            apt update
+            apt install -y locales
         fi
-        locale-gen
-        ;;
-    "centos"|"rhel"|"fedora")
-        # CentOS/RHEL/Fedora 系统语言环境通常已预生成，只需确保存在
+        if [ -f /etc/locale.gen ]; then
+            if ! grep -q "^zh_CN.UTF-8 UTF-8" /etc/locale.gen; then
+                sed -i 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/' /etc/locale.gen
+            fi
+            locale-gen
+        else
+            echo "错误：/etc/locale.gen 文件不存在，请手动运行 'dpkg-reconfigure locales' 配置语言环境。"
+            exit 1
+        fi
         if ! locale -a | grep -q "zh_CN.utf8"; then
-            echo "zh_CN.UTF-8 语言环境未找到，尝试生成..."
-            localedef -c -f UTF-8 -i zh_CN zh_CN.UTF-8
+            echo "错误：zh_CN.UTF-8 语言环境生成失败，请检查系统配置。"
+            exit 1
         fi
         ;;
     *)
@@ -59,6 +66,7 @@ case "$DISTRO" in
         exit 1
         ;;
 esac
+
 
 # 步骤4：设置系统默认语言环境为zh_CN.UTF-8
 echo "设置系统默认语言环境为zh_CN.UTF-8..."

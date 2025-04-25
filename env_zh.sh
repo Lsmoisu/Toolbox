@@ -58,6 +58,21 @@ export LANGUAGE=zh_CN:zh
 export LC_CTYPE=zh_CN.UTF-8
 unset LC_ALL
 
+# 设置系统时区为东八区 (Asia/Shanghai)
+echo "设置系统时区为东八区 (Asia/Shanghai)..."
+if [ "$SYSTEM_TYPE" = "debian" ]; then
+    sudo dpkg-reconfigure -f noninteractive tzdata
+    sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+    sudo bash -c 'echo "Asia/Shanghai" > /etc/timezone'
+elif [ "$SYSTEM_TYPE" = "centos" ]; then
+    sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+    sudo bash -c 'echo "ZONE=Asia/Shanghai" > /etc/sysconfig/clock'
+fi
+
+# 检查当前时区设置
+echo "当前时区设置如下："
+date
+
 # 检查当前语言环境设置
 echo "当前语言环境设置如下："
 locale

@@ -9,7 +9,7 @@ NC='\033[0m' # No Color
 
 # 工具箱菜单
 echo -e "${GREEN}=========================================${NC}"
-echo -e "${GREEN}       欢迎使用运维工具箱v0.1.0${NC}"
+echo -e "${GREEN}       欢迎使用运维工具箱v0.2.0${NC}"
 echo -e "${GREEN}=========================================${NC}"
 echo -e "${YELLOW}请选择您需要的功能：${NC}"
 echo -e "${BLUE}1. 启用免密登录${NC}"
@@ -18,11 +18,12 @@ echo -e "${BLUE}3. 安装Hysteria2代理${NC}"
 echo -e "${BLUE}4. 安装其他代理${NC}"
 echo -e "${BLUE}5. VPS测试（融合怪测评脚本）${NC}"
 echo -e "${BLUE}6. 修改系统环境为中文+东八区${NC}"
-echo -e "${BLUE}7. 退出${NC}"
+echo -e "${BLUE}7. 安装Docker${NC}"
+echo -e "${BLUE}8. 退出${NC}"
 echo -e "${GREEN}=========================================${NC}"
 
 # 读取用户输入
-read -p "请输入选项 (1-7): " choice
+read -p "请输入选项 (1-8): " choice
 
 case $choice in
     1)
@@ -50,10 +51,19 @@ case $choice in
         bash <(curl -fsSL https://github.com/Lsmoisu/Toolbox/raw/refs/heads/main/env_zh.sh)
         ;;
     7)
+        echo -e "${YELLOW}正在安装Docker...${NC}"
+        bash <(curl -fsSL https://get.docker.com)
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}Docker安装成功！${NC}"
+        else
+            echo -e "${RED}Docker安装失败，请检查网络或手动安装。${NC}"
+        fi
+        ;;
+    8)
         echo -e "${GREEN}退出工具箱，感谢使用！${NC}"
         exit 0
         ;;
     *)
-        echo -e "${RED}无效选项，请重新运行脚本并选择1-7之间的选项。${NC}"
+        echo -e "${RED}无效选项，请重新运行脚本并选择1-8之间的选项。${NC}"
         ;;
 esac

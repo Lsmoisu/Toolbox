@@ -1,11 +1,4 @@
 #!/bin/bash
-# 脚本名称: setup_chinese_locale.sh
-# 描述: 配置中文语言环境，支持 Ubuntu 和 CentOS 系统。
-#       包括安装必要包、生成 Locale、设置环境变量，并新增设置时区为东八区 (Asia/Shanghai)。
-# 作者: AI Assistant (基于用户查询生成)
-# 版本: 1.2 (增加了时区设置)
-# 注意: 以 root 或 sudo 权限运行此脚本。
-#       针对 Ubuntu 24.10 和 CentOS 7+。
 
 # 步骤0: 检测操作系统
 OS_ID=""
@@ -56,7 +49,10 @@ fi
 # 步骤2: 安装必要工具和包
 echo "步骤2: 安装中文相关包..."
 if [[ "$OS_ID" == "ubuntu" || "$OS_ID" == "debian" ]]; then
-    sudo apt install -y locales language-pack-zh-hans fonts-wqy-zenhei manpages-zh
+    sudo apt install -y locales fonts-wqy-zenhei manpages-zh  # 移除 language-pack-zh-hans
+    if [ $? -ne 0 ]; then
+        echo "警告: 某些包安装失败 (如 language-pack-zh-hans 不可用)。将继续执行其他步骤。"
+    fi
 elif [[ "$OS_ID" == "centos" || "$OS_ID" == "rhel" ]]; then
     # 先安装 EPEL 仓库
     if command -v dnf &> /dev/null; then
@@ -68,13 +64,52 @@ elif [[ "$OS_ID" == "centos" || "$OS_ID" == "rhel" ]]; then
     fi
     if [ $? -ne 0 ]; then
         echo "错误: EPEL 或包安装失败。请手动检查。"
-        exit 1
+        exit 1  # CentOS 分支保持严格
     fi
 fi
 
-if [ $? -ne 0 ]; then
-    echo "错误: 包安装失败。请手动检查包管理器错误日志。"
-    exit 1
+# 步骤2.5: 检测并安装 Vim，并修复中文乱码
+echo "步骤2.5: 检测并安装 Vim，并修复中文乱码..."
+if ! command -v vim &> /dev/null; then  # 检查 Vim 是否已安装
+    echo "Vim 未安装，正在安装..."
+    if [[ "$OS_ID" == "ubuntu" || "$OS_ID" == "debian" ]]; then
+        sudo apt install -y vim
+    elif [[ "$OS_ID" == "centos" || "$OS_ID" == "rhel" ]]; then
+        if command -v dnf &> /dev/null; then
+            sudo dnf install -y vim
+        elif command -v yum &> /dev/null; then
+            sudo yum install -y vim
+        fi
+    fi
+    if [ $? -ne 0 ]; then
+        echo "警告: Vim 安装失败。请手动安装 (sudo apt/yum/dnf install vim)。"
+    else
+        echo "成功: Vim 已安装。"
+    fi
+else
+    echo "Vim 已安装。"
+fi
+
+# 修复 Vim 中文乱码：修改 ~/.vimrc
+if command -v vim &> /dev/null; then  # 确保 Vim 已可用
+    VIMRC_FILE=~/.vimrc
+    if [ ! -f "$VIMRC_FILE" ]; then  # 如果文件不存在，创建它
+        touch "$VIMRC_FILE"
+        echo "\" 新创建的 Vim 配置文件" > "$VIMRC_FILE"
+    fi
+    # 添加或更新配置
+    if grep -q "set encoding=utf-8" "$VIMRC_FILE"; then
+        echo "Vim 配置中已包含 encoding 设置。"
+    else
+        echo "set encoding=utf-8" >> "$VIMRC_FILE"
+        echo "set fileencodings=utf-8,ucs-bom,gbk,gb18030,gb2312,big5" >> "$VIMRC_FILE"
+        echo "成功: 已添加 Vim 中文支持配置。"
+    fi
+    if [ $? -ne 0 ]; then
+        echo "警告: Vim 配置修改失败。请手动编辑 ~/.vimrc。"
+    fi
+else
+    echo "警告: Vim 不可用，无法修复中文乱码。"
 fi
 
 # 步骤3: 生成和配置 Locale
@@ -107,50 +142,8 @@ if [ $? -ne 0 ]; then
     echo "警告: 环境变量设置可能未完全生效。请重新登录 SSH。"
 fi
 
-# 检查vim是否已安装
-echo "检查vim是否已安装..."
-if command -v vim &> /dev/null; then
-    echo "vim已安装，跳过安装步骤。"
-else
-    echo "vim未安装，正在安装..."
-    if [ "$SYSTEM_TYPE" = "debian" ]; then
-        sudo apt install -y vim
-    elif [ "$SYSTEM_TYPE" = "centos" ]; then
-        sudo yum install -y vim-enhanced
-    fi
-fi
-
-# 配置vim支持中文编码
-echo "配置vim支持中文编码..."
-VIMRC="/etc/vimrc"
-if [ "$SYSTEM_TYPE" = "debian" ]; then
-    VIMRC="/etc/vim/vimrc"
-fi
-if [ -f "$VIMRC" ]; then
-    if grep -q "set fileencodings=utf-8" "$VIMRC"; then
-        echo "vim编码配置已存在，跳过添加。"
-    else
-        sudo bash -c "cat >> '$VIMRC' << EOF
-\" 设置编码支持中文
-set fileencodings=utf-8,ucs-bom,gb18030,gbk,gb2312,cp936
-set termencoding=utf-8
-set encoding=utf-8
-EOF"
-        echo "vim编码配置已添加。"
-    fi
-else
-    echo "vim配置文件 $VIMRC 不存在，请检查vim安装。"
-fi
-
-# 测试vim中文显示
-echo "测试vim中文显示..."
-TEST_FILE="/tmp/test_chinese.txt"
-echo "测试中文显示 - Test Chinese Display" > "$TEST_FILE"
-echo "请在vim中打开 $TEST_FILE 检查中文是否正常显示。"
-echo "命令：vim $TEST_FILE"
-
 # 步骤5: 验证配置
-echo "步骤5: 验证中文语言环境和时区..."
+echo "步骤5: 验证中文语言环境、时区和 Vim 配置..."
 locale  # 显示当前 Locale 设置
 timedatectl  # 显示当前时区设置
 if locale | grep -q "zh_CN.UTF-8"; then
@@ -158,6 +151,7 @@ if locale | grep -q "zh_CN.UTF-8"; then
 else
     echo "警告: 配置可能未完全成功。请检查输出并手动验证。"
 fi
-echo "提示: 请重新登录 SSH 会话以确保所有变化生效，包括时区。"
 
-echo "脚本执行完毕。如果有问题，请查看系统日志 (e.g., sudo cat /var/log/syslog | grep locale 或 sudo cat /var/log/messages | grep timezone)。"
+echo "提示: 请重新登录 SSH 会话以确保所有变化生效，包括时区和 Vim 设置。"
+
+echo "脚本执行完毕。如果有问题，请查看系统日志 (e.g., sudo cat /var/log/syslog | grep locale 或 sudo cat /var/log/messages | grep vim)。"

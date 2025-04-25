@@ -17,7 +17,7 @@ echo -e "${BLUE}2. 安装Grafana+Prometheus+Node Exporter监控工具${NC}"
 echo -e "${BLUE}3. 安装Hysteria2代理${NC}"
 echo -e "${BLUE}4. 安装其他代理${NC}"
 echo -e "${BLUE}5. VPS测试（融合怪测评脚本）${NC}"
-echo -e "${BLUE}6. 修改系统环境为中文${NC}"
+echo -e "${BLUE}6. 修改系统环境为中文+东八区${NC}"
 echo -e "${BLUE}7. 退出${NC}"
 echo -e "${GREEN}=========================================${NC}"
 

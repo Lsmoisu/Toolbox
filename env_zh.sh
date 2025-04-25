@@ -1,85 +1,100 @@
 #!/bin/bash
-# 脚本名称：setup_locale_vim_chinese.sh
-# 功能：设置系统语言环境和Vim配置以解决中文乱码问题
-# 适用系统：Debian/Ubuntu, CentOS/RHEL
 
-echo "开始设置系统语言环境和Vim配置以解决中文乱码问题..."
+# 步骤0: 检测操作系统
+OS_ID=""
+if [ -f /etc/os-release ]; then
+    source /etc/os-release  # 加载 OS 变量
+    OS_ID=$ID
+fi
 
-# 检测系统类型
-SYSTEM_TYPE=""
-if [ -f /etc/debian_version ]; then
-    SYSTEM_TYPE="debian"
-    echo "检测到的系统类型：Debian/Ubuntu"
-elif [ -f /etc/redhat-release ]; then
-    SYSTEM_TYPE="centos"
-    echo "检测到的系统类型：CentOS/RHEL"
+echo "检测到的操作系统: $OS_ID"
+
+# 步骤1: 更新系统（根据 OS 使用不同的包管理器）
+echo "步骤1: 更新系统..."
+if [[ "$OS_ID" == "ubuntu" || "$OS_ID" == "debian" ]]; then
+    sudo apt update && sudo apt upgrade -y
+elif [[ "$OS_ID" == "centos" || "$OS_ID" == "rhel" ]]; then
+    if command -v dnf &> /dev/null; then  # CentOS 8+
+        sudo dnf update -y
+    elif command -v yum &> /dev/null; then  # CentOS 7
+        sudo yum update -y
+    else
+        echo "错误: 未找到包管理器 (yum 或 dnf)。脚本无法继续。"
+        exit 1
+    fi
 else
-    echo "不支持的系统类型！此脚本仅适用于Debian/Ubuntu和CentOS/RHEL系统。"
+    echo "错误: 不支持的操作系统 ($OS_ID)。仅支持 Ubuntu/Debian 和 CentOS/RHEL。"
     exit 1
 fi
 
-# 根据系统类型检查并安装语言包
-echo "检查并安装语言包..."
-if [ "$SYSTEM_TYPE" = "debian" ]; then
-    sudo apt update
-    sudo apt install -y locales
-elif [ "$SYSTEM_TYPE" = "centos" ]; then
-    sudo yum install -y glibc-common
+if [ $? -ne 0 ]; then
+    echo "错误: 系统更新失败。请检查网络或权限。"
+    exit 1
 fi
 
-# 生成zh_CN.UTF-8语言环境
-echo "生成zh_CN.UTF-8语言环境..."
-if [ "$SYSTEM_TYPE" = "debian" ]; then
-    if [ -f /etc/locale.gen ]; then
-        sudo sed -i 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/' /etc/locale.gen
-    else
-        sudo bash -c 'echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen'
+# 步骤2: 安装必要工具和包
+echo "步骤2: 安装中文相关包..."
+if [[ "$OS_ID" == "ubuntu" || "$OS_ID" == "debian" ]]; then
+    sudo apt install -y locales language-pack-zh-hans fonts-wqy-zenhei manpages-zh
+elif [[ "$OS_ID" == "centos" || "$OS_ID" == "rhel" ]]; then
+    # 先安装 EPEL 仓库
+    if command -v dnf &> /dev/null; then
+        sudo dnf install -y epel-release
+        sudo dnf install -y glibc-common wqy-zenhei-fonts  # manpages-zh 可能不可用，跳过
+    elif command -v yum &> /dev/null; then
+        sudo yum install -y epel-release
+        sudo yum install -y glibc-common wqy-zenhei-fonts  # manpages-zh 可能不可用，跳过
     fi
-    sudo locale-gen
-elif [ "$SYSTEM_TYPE" = "centos" ]; then
-    sudo localedef -c -f UTF-8 -i zh_CN zh_CN.UTF-8
+    if [ $? -ne 0 ]; then
+        echo "错误: EPEL 或包安装失败。请手动检查。"
+        exit 1
+    fi
 fi
 
-# 设置系统默认语言环境为zh_CN.UTF-8
-echo "设置系统默认语言环境为zh_CN.UTF-8..."
-if [ "$SYSTEM_TYPE" = "debian" ]; then
-    sudo bash -c 'echo "LANG=zh_CN.UTF-8" > /etc/default/locale'
-    sudo bash -c 'echo "LANGUAGE=zh_CN:zh" >> /etc/default/locale'
-    sudo bash -c 'echo "LC_CTYPE=zh_CN.UTF-8" >> /etc/default/locale'
-elif [ "$SYSTEM_TYPE" = "centos" ]; then
-    sudo bash -c 'echo "LANG=zh_CN.UTF-8" > /etc/locale.conf'
-    sudo bash -c 'echo "LC_CTYPE=zh_CN.UTF-8" >> /etc/locale.conf'
+if [ $? -ne 0 ]; then
+    echo "错误: 包安装失败。请手动检查包管理器错误日志。"
+    exit 1
 fi
 
-# 更新当前会话环境变量
-echo "更新当前会话环境变量..."
-export LANG=zh_CN.UTF-8
-export LANGUAGE=zh_CN:zh
-export LC_CTYPE=zh_CN.UTF-8
-unset LC_ALL
-
-# 设置系统时区为东八区 (Asia/Shanghai)
-echo "设置系统时区为东八区 (Asia/Shanghai)..."
-if [ "$SYSTEM_TYPE" = "debian" ]; then
-    sudo dpkg-reconfigure -f noninteractive tzdata
-    sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-    sudo bash -c 'echo "Asia/Shanghai" > /etc/timezone'
-elif [ "$SYSTEM_TYPE" = "centos" ]; then
-    sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-    sudo bash -c 'echo "ZONE=Asia/Shanghai" > /etc/sysconfig/clock'
+# 步骤3: 生成和配置 Locale
+echo "步骤3: 生成中文 Locale..."
+if [[ "$OS_ID" == "ubuntu" || "$OS_ID" == "debian" ]]; then
+    sudo locale-gen zh_CN.UTF-8
+    sudo update-locale LANG=zh_CN.UTF-8 LC_ALL=zh_CN.UTF-8
+elif [[ "$OS_ID" == "centos" || "$OS_ID" == "rhel" ]]; then
+    sudo localedef -i zh_CN -f UTF-8 zh_CN.UTF-8  # 生成 Locale
+    if [ $? -eq 0 ]; then
+        echo "export LANG=zh_CN.UTF-8" | sudo tee -a /etc/locale.conf  # 设置系统级 Locale
+        echo "export LC_ALL=zh_CN.UTF-8" | sudo tee -a /etc/locale.conf
+    else
+        echo "错误: Locale 生成失败。"
+        exit 1
+    fi
 fi
 
-# 检查当前时区设置
-echo "当前时区设置如下："
-date
+if [ $? -ne 0 ]; then
+    echo "错误: 更新系统 Locale 失败。"
+    exit 1
+fi
 
-# 检查当前语言环境设置
-echo "当前语言环境设置如下："
-locale
+# 步骤4: 设置用户环境变量
+echo "步骤4: 配置用户环境变量..."
+echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
+echo 'export LC_ALL=zh_CN.UTF-8' >> ~/.bashrc
+source ~/.bashrc  # 立即应用更改
+if [ $? -ne 0 ]; then
+    echo "警告: 环境变量设置可能未完全生效。请重新登录 SSH。"
+fi
 
-# 检查语言环境是否可用
-echo "检查可用语言环境列表："
-locale -a
+# 步骤5: 验证配置
+echo "步骤5: 验证中文语言环境..."
+locale  # 显示当前 Locale 设置
+if locale | grep -q "zh_CN.UTF-8"; then
+    echo "成功: 中文语言环境配置完成！"
+    echo "提示: 请重新登录 SSH 会话以确保所有变化生效。"
+else
+    echo "警告: 配置可能未完全成功。请检查输出并手动验证。"
+fi
 
 # 检查vim是否已安装
 echo "检查vim是否已安装..."
@@ -123,20 +138,4 @@ echo "测试中文显示 - Test Chinese Display" > "$TEST_FILE"
 echo "请在vim中打开 $TEST_FILE 检查中文是否正常显示。"
 echo "命令：vim $TEST_FILE"
 
-# 清理包管理缓存
-echo "清理包管理缓存..."
-if [ "$SYSTEM_TYPE" = "debian" ]; then
-    sudo apt autoremove -y
-    sudo apt autoclean
-elif [ "$SYSTEM_TYPE" = "centos" ]; then
-    sudo yum autoremove -y
-    sudo yum clean all
-fi
-
-echo "脚本执行完成！"
-echo "注意：如果通过SSH连接，请确保终端客户端（如PuTTY、iTerm2）字符编码设置为UTF-8。"
-echo "如果中文仍显示乱码，请重新登录shell或重启系统以应用语言环境更改。"
-echo "如有问题，请提供以下信息："
-echo "1. locale 命令输出"
-echo "2. vim $TEST_FILE 时中文是否乱码"
-echo "3. 使用的终端类型（本地或SSH客户端）"
+echo "脚本执行完毕。如果有问题，请查看系统日志 (e.g., sudo cat /var/log/messages | grep locale) 或运行 'locale' 命令。"

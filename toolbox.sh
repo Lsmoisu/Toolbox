@@ -19,11 +19,12 @@ echo -e "${BLUE}4. 安装其他代理${NC}"
 echo -e "${BLUE}5. VPS测试（融合怪测评脚本）${NC}"
 echo -e "${BLUE}6. 修改系统环境为中文+东八区${NC}"
 echo -e "${BLUE}7. 安装Docker和Docker Compose${NC}"
-echo -e "${BLUE}8. 退出${NC}"
+echo -e "${BLUE}8. 安装Gost并启用Socks5${NC}"  # 调整为选项8
+echo -e "${BLUE}9. 退出${NC}"  # 调整为选项9
 echo -e "${GREEN}=========================================${NC}"
 
 # 读取用户输入
-read -p "请输入选项 (1-8): " choice
+read -p "请输入选项 (1-9): " choice
 
 case $choice in
     1)
@@ -77,11 +78,15 @@ case $choice in
             echo -e "${RED}无法获取Docker Compose最新版本号，请检查网络或手动安装。${NC}"
         fi
         ;;
-    8)
+    8)  # 调整为选项8
+        echo -e "${YELLOW}正在安装Gost并启用Socks5...${NC}"
+        bash <(curl -fsSL https://github.com/Lsmoisu/Toolbox/raw/refs/heads/main/install_gost_socks5.sh)
+        ;;
+    9)  # 调整为选项9
         echo -e "${GREEN}退出工具箱，感谢使用！${NC}"
         exit 0
         ;;
     *)
-        echo -e "${RED}无效选项，请重新运行脚本并选择1-8之间的选项。${NC}"
+        echo -e "${RED}无效选项，请重新运行脚本并选择1-9之间的选项。${NC}"
         ;;
 esac

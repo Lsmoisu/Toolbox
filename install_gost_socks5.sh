@@ -50,9 +50,9 @@ case $choice in
             exit 1
         fi
 
-        read -p "输入用户名 [默认: mseindfSjgs]: " username
+        read -p "输入用户名 [默认: bigbigboom]: " username
         if [ -z "$username" ]; then
-            username="mseindfSjgs"  # 如果不输入，使用默认用户名
+            username="bigbigboom"  # 如果不输入，使用默认用户名
         fi
 
         default_password=$(generate_random_password)  # 生成随机密码

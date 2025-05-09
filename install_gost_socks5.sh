@@ -30,6 +30,12 @@ get_latest_version() {
     fi
 }
 
+# 生成随机密码
+generate_random_password() {
+    generated_password=$(</dev/urandom tr -dc 'A-Za-z0-9' | head -c 10)
+    echo "$generated_password"
+}
+
 # 主菜单
 echo -e "${GREEN}请选择操作：${NC}"
 echo -e "${YELLOW}1. 安装 GOST 并启用 SOCKS5 (以 root 用户运行)${NC}"
@@ -44,12 +50,16 @@ case $choice in
             exit 1
         fi
 
-        read -p "输入用户名 [默认: bigbigboom]: " username
+        read -p "输入用户名 [默认: mseindfSjgs]: " username
         if [ -z "$username" ]; then
-            username="bigbigboom"  # 如果不输入，使用默认用户名
+            username="mseindfSjgs"  # 如果不输入，使用默认用户名
         fi
 
-        read -s -p "输入密码: " password  # 使用 -s 隐藏输入
+        default_password=$(generate_random_password)  # 生成随机密码
+        read -s -p "输入密码 [默认: $default_password]: " password  # 使用 -s 隐藏输入
+        if [ -z "$password" ]; then
+            password="$default_password"  # 如果不输入，使用随机密码
+        fi
         echo  # 换行
 
         read -p "输入端口 [默认: 12333]: " port

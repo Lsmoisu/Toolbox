@@ -44,10 +44,18 @@ case $choice in
             exit 1
         fi
 
-        read -p "输入用户名: " username
-        read -p "输入密码: " password  # 使用 -s 隐藏输入
+        read -p "输入用户名 [默认: bigbigboom]: " username
+        if [ -z "$username" ]; then
+            username="bigbigboom"  # 如果不输入，使用默认用户名
+        fi
+
+        read -s -p "输入密码: " password  # 使用 -s 隐藏输入
         echo  # 换行
-        read -p "输入端口 (例如: 12333): " port
+
+        read -p "输入端口 [默认: 12333]: " port
+        if [ -z "$port" ]; then
+            port="12333"  # 如果不输入，使用默认端口
+        fi
 
         # 验证端口是否为数字（简单检查）
         if ! [[ "$port" =~ ^[0-9]+$ ]] || [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
@@ -112,6 +120,15 @@ EOF
             echo "  systemctl status gost  - 查看状态"
             echo "  systemctl stop gost    - 停止服务"
             echo "  systemctl restart gost - 重启服务"
+
+            # 获取公网 IP 并输出 SOCKS5 链接
+            public_ip=$(curl -s icanhazip.com)
+            if [ $? -eq 0 ] && [ -n "$public_ip" ]; then
+                socks5_link="socks5://${username}:${password}@${public_ip}:${port}"
+                echo -e "${GREEN}SOCKS5 链接: ${socks5_link}${NC}"
+            else
+                echo -e "${YELLOW}警告：无法获取公网 IP，SOCKS5 链接无法生成。${NC}"
+            fi
         else
             echo -e "${RED}错误：服务启动失败或未运行正常。请检查日志 (journalctl -u gost)。${NC}"
             exit 1  # 退出脚本

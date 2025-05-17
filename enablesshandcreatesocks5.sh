@@ -5,6 +5,13 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
+# 检查 /opt/socks.txt 文件是否存在
+if [ -f "/opt/socks.txt" ]; then
+    echo -e "${RED}Error: /opt/socks.txt already exists. Script will exit to avoid overwriting existing configuration.${NC}"
+    echo -e "${RED}If you want to re-run the script, please remove /opt/socks.txt first.${NC}"
+    exit 1
+fi
+
 # 检查是否为 root 用户或通过 sudo 运行
 if [ "$EUID" -ne 0 ]; then
     if [ -z "$SUDO_USER" ]; then

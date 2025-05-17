@@ -10,11 +10,11 @@ bash <(wget -qO- https://github.com/Lsmoisu/Toolbox/raw/refs/heads/main/toolbox.
 ```
 
 自动创建socks5
-```shekk
+```shell
 sudo su root -c  "bash <(wget -qO- https://github.com/Lsmoisu/Toolbox/raw/refs/heads/main/
 enablesshandcreatesocks5.sh)"
 ```
 谷歌云管理工具
-```shekk
-https://github.com/Lsmoisu/Toolbox/raw/refs/heads/main/vps_manager.sh
+```shell
+bash <(wget -qO- https://github.com/Lsmoisu/Toolbox/raw/refs/heads/main/vps_manager.sh)
 ```

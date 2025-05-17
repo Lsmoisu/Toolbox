@@ -8,3 +8,9 @@
 ```shell
 bash <(wget -qO- https://github.com/Lsmoisu/Toolbox/raw/refs/heads/main/toolbox.sh)
 ```
+
+自动创建socks5
+```shekk
+sudo su root -c  "bash <(wget -qO- https://github.com/Lsmoisu/Toolbox/raw/refs/heads/main/
+enablesshandcreatesocks5.sh)"
+```

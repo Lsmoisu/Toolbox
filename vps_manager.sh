@@ -352,7 +352,76 @@ show_project_menu() {
     fi
     return 0
 }
+# 获取可用结算账号列表
+get_billing_accounts() {
+    echo "正在获取可用的结算账号列表..."
+    # 尝试列出状态为 OPEN 且当前用户有权关联的结算账号
+    billing_accounts_list=$(gcloud billing accounts list --filter='open=true' --format="value(ACCOUNT_ID, NAME)" 2>/dev/null)
 
+    if [ -z "$billing_accounts_list" ]; then
+        echo "未能获取到结算账号列表。可能是因为："
+        echo "1. 当前授权账号没有查看结算账号的权限。"
+        echo "2. 没有可用的（状态为 OPEN）结算账号。"
+        echo "3. gcloud 配置或网络连接问题。"
+        return 1 # 指示失败或未找到账户
+    fi
+
+    declare -g -a billing_account_array_ids # 仅存储账户 ID
+    declare -g -a billing_account_array_display # 存储用于菜单显示的信息
+
+    billing_account_array_ids=()
+    billing_account_array_display=()
+
+    local i=1
+    IFS=$'\n'
+    for line in $billing_accounts_list; do
+        if [ -z "$line" ]; then
+            continue
+        fi
+        account_id=$(echo "$line" | cut -d$'\t' -f1)
+        # 获取账户 ID 之后的所有内容作为显示名称, 如果存在的话
+        display_name=$(echo "$line" | cut -d$'\t' -f2- | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+        if [ -n "$account_id" ]; then
+            billing_account_array_ids+=("$account_id")
+            # 检查显示名称是否为空，如果为空则只显示账号ID，否则显示ID和名称
+            if [ -z "$display_name" ]; then
+                billing_account_array_display+=("$i. $account_id")
+            else
+                billing_account_array_display+=("$i. $account_id - $display_name")
+            fi
+            ((i++))
+        fi
+    done
+    unset IFS
+
+    if [ ${#billing_account_array_ids[@]} -eq 0 ]; then
+        echo "未找到可用的结算账号。"
+        return 1 # 指示未找到账户
+    fi
+    return 0 # 成功
+}
+
+# 显示结算账号选择菜单
+show_billing_account_menu() {
+    echo "请选择要关联的结算账号："
+    if [ ${#billing_account_array_display[@]} -eq 0 ]; then
+        # 此情况理论上如果 get_billing_accounts 返回 0 则不会发生，但作为健壮性检查
+        echo "错误：billing_account_array_display 为空，但 get_billing_accounts 返回成功。"
+        echo "0. 取消并返回主菜单"
+        echo "m. 手动输入结算账号 ID"
+        return 1 # 表示菜单显示有问题
+    fi
+
+    for item in "${billing_account_array_display[@]}"; do
+        echo "$item"
+    done
+    echo "-------------------------------------"
+    echo "m. 手动输入结算账号 ID"
+    echo "0. 取消并返回主菜单"
+    echo "请输入选项 (1-${#billing_account_array_ids[@]}, m, 或 0):"
+    return 0
+}
 # 主循环
 while true; do
     show_menu
@@ -508,29 +577,137 @@ while true; do
             read -e -r -n 1
             ;;
         5)
-            echo "正在添加项目..."
-            echo "请输入项目 ID（小写字母、数字或短划线组成，例如 my-project-123）："
+            echo "正在添加项目 (并关联结算账号)..."
+            echo "请输入项目 ID（6-30 个字符，小写字母开头，可包含小写字母、数字或连字符，例如 my-project-123）："
             read -e -r project_id
             if [ -z "$project_id" ]; then
                 echo "未输入项目 ID，操作取消。"
+            elif ! [[ "$project_id" =~ ^[a-z][a-z0-9-]{4,28}[a-z0-9]$ ]]; then
+                echo "项目 ID 格式无效。要求：以小写字母开头，可包含小写字母、数字或连字符，总长度为 6 到 30 个字符。"
+                project_id="" # 清空以便后续判断
+            fi
+            if [ -z "$project_id" ]; then # 如果 project_id 无效或为空
                 echo "按任意键返回菜单..."
                 read -e -r -n 1
                 continue
             fi
-            echo "请输入项目名称（可包含空格，例如 My Project）："
+
+            echo "请输入项目名称（可选，可包含空格，例如 My Project，留空则默认使用项目 ID）："
             read -e -r project_name
-            if [ -z "$project_name" ]; then
-                echo "未输入项目名称，操作取消。"
+            # 项目名称可以为空，GCP 会默认使用项目 ID
+
+            selected_billing_account_id=""
+            echo # 空行以改善可读性
+            get_billing_accounts
+            billing_fetch_status=$? # 0 表示成功获取并有账户，1 表示获取失败或无账户
+
+            while true; do
+                if [ "$billing_fetch_status" -eq 0 ]; then # 成功获取到账户列表
+                    show_billing_account_menu
+                else # 未能自动获取到账户
+                    echo "未能自动获取结算账户列表。"
+                    echo "您可以选择："
+                    echo "m. 手动输入结算账号 ID"
+                    echo "0. 取消并返回主菜单"
+                    echo "请输入选项 (m 或 0):"
+                fi
+
+                read -e -r billing_choice
+
+                if [ "$billing_choice" == "0" ]; then
+                    echo "操作取消。"
+                    echo "按任意键返回菜单..."
+                    read -e -r -n 1
+                    continue 2 # 继续外层主循环
+                elif [ "$billing_choice" == "m" ] || [ "$billing_choice" == "M" ]; then
+                    echo "请输入要关联的结算账号 ID (格式: XXXXXX-XXXXXX-XXXXXX):"
+                    read -e -r manual_billing_id
+                    if [ -z "$manual_billing_id" ]; then
+                        echo "未输入结算账号 ID。请重新选择或输入。"
+                        # 如果之前获取失败，再次提示手动或取消
+                        if [ "$billing_fetch_status" -ne 0 ]; then continue; fi
+                    elif ! [[ "$manual_billing_id" =~ ^[0-9A-F]{6}-[0-9A-F]{6}-[0-9A-F]{6}$ ]]; then
+                        echo "结算账号 ID 格式无效 (期望格式: XXXXXX-XXXXXX-XXXXXX)。请检查并重新输入。"
+                        if [ "$billing_fetch_status" -ne 0 ]; then continue; fi
+                    else
+                        selected_billing_account_id="$manual_billing_id"
+                        echo "将使用手动输入的结算账号：$selected_billing_account_id"
+                        break # 跳出结算账号选择循环
+                    fi
+                # 仅当 billing_fetch_status 为 0 (即列表成功显示) 时，才处理数字选项
+                elif [ "$billing_fetch_status" -eq 0 ] && [[ "$billing_choice" =~ ^[0-9]+$ ]] && [ "$billing_choice" -ge 1 ] && [ "$billing_choice" -le "${#billing_account_array_ids[@]}" ]; then
+                    selected_billing_account_id="${billing_account_array_ids[$((billing_choice-1))]}"
+                    echo "已选择结算账号：$selected_billing_account_id"
+                    break # 跳出结算账号选择循环
+                else
+                    echo "无效选项 '$billing_choice'。"
+                    if [ "$billing_fetch_status" -ne 0 ]; then
+                         echo "由于未能自动获取结算账户列表，您需要手动输入 (m) 或取消 (0)。"
+                    else
+                         echo "请输入列表中的数字、'm' 或 '0'。"
+                    fi
+                fi
+            done
+
+            if [ -z "$selected_billing_account_id" ]; then # 如果循环结束还没有选定结算账号
+                echo "未指定有效的结算账号，项目创建取消。"
                 echo "按任意键返回菜单..."
                 read -e -r -n 1
                 continue
             fi
-            echo "正在创建项目 $project_id ($project_name)..."
-            gcloud projects create "$project_id" --name="$project_name"
-            if [ $? -eq 0 ]; then
-                echo "项目 $project_id 创建成功！"
+
+            echo # 空行
+            echo "即将执行以下操作："
+            echo "  创建项目 ID: $project_id"
+            if [ -n "$project_name" ]; then
+                echo "  项目名称: $project_name"
             else
-                echo "项目创建失败，请检查项目 ID 是否唯一或是否有权限。"
+                echo "  项目名称: (将使用项目 ID)"
+            fi
+            echo "  关联结算账号: $selected_billing_account_id"
+            echo "确认创建项目并关联结算账号吗？ (输入 'yes' 确认):"
+            read -e -r confirm_create
+            if [[ "$confirm_create" != "yes" ]]; then
+                echo "项目创建已取消。"
+                echo "按任意键返回菜单..."
+                read -e -r -n 1
+                continue
+            fi
+
+            # 创建项目和关联结算账号分两步执行
+            echo "正在创建项目..."
+            if [ -z "$project_name" ]; then
+                gcloud projects create "$project_id" --quiet
+            else
+                gcloud projects create "$project_id" --name="$project_name" --quiet
+            fi
+
+            create_status=$?
+            if [ $create_status -eq 0 ]; then
+                echo "项目 '$project_id' 创建请求已提交。"
+                echo "正在关联结算账号..."
+                # 关联结算账号
+                gcloud billing projects link "$project_id" --billing-account="$selected_billing_account_id" --quiet
+                billing_status=$?
+                
+                if [ $billing_status -eq 0 ]; then
+                    echo "项目 '$project_id' 已成功关联到结算账号 '$selected_billing_account_id'。"
+                    echo "注意：项目创建和结算账号关联可能是异步操作，可能需要一些时间才能完全生效并在控制台中正确显示。"
+                    echo "您可以稍后使用 'gcloud billing projects describe $project_id' 来验证结算信息。"
+                else
+                    echo "结算账号关联失败 (退出码: $billing_status)。请检查以下可能的原因："
+                    echo "1. 结算账号 ID '$selected_billing_account_id' 无效、您没有权限使用它，或者它不处于活动状态。"
+                    echo "2. 当前授权账号可能没有足够的权限（如 roles/billing.user）。"
+                    echo "3. Google Cloud API 可能遇到临时问题。"
+                    echo "您可以稍后手动关联结算账号：gcloud billing projects link $project_id --billing-account=$selected_billing_account_id"
+                fi
+            else
+                echo "项目创建或结算账号关联失败 (退出码: $create_status)。请检查以下可能的原因："
+                echo "1. 项目 ID '$project_id' 可能已被占用或格式仍不符合最新 GCP 要求。"
+                echo "2. 结算账号 ID '$selected_billing_account_id' 无效、您没有权限使用它，或者它不处于活动状态。"
+                echo "3. 当前授权账号可能没有足够的权限（如 roles/billing.user, roles/resourcemanager.projectCreator）。"
+                echo "4. Google Cloud API 可能遇到临时问题。"
+                echo "请检查 gcloud 的详细错误输出（如果上述命令未加 --quiet，则会有输出）。"
             fi
             echo "按任意键返回菜单..."
             read -e -r -n 1

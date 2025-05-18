@@ -20,10 +20,11 @@ show_menu() {
     echo "13. 配置防火墙"
     echo "14. 查看防火墙规则"
     echo "15. 删除防火墙规则"
+    echo "16. 查看所有可用的结算账号"
 
     echo "0. 退出脚本"
     echo "====================================="
-    echo "请输入选项（0-13）："
+    echo "请输入选项（0-16）："
 }
 
 # 获取当前日期，格式为 YYYYMMDD
@@ -440,6 +441,19 @@ while true; do
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
+        16)
+            echo "正在查看所有可用的结算账号..."
+            if get_billing_accounts; then
+                echo "可用的结算账号列表："
+                for item in "${billing_account_array_display[@]}"; do
+                    echo "$item"
+                done
+            else
+                echo "无法获取结算账号列表。"
+            fi
+            echo "按任意键返回菜单..."
+            read -e -r -n 1
+            ;;
         2)
             echo "正在删除账号..."
             account_data=$(get_account_list)
@@ -526,6 +540,19 @@ while true; do
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
+        16)
+            echo "正在查看所有可用的结算账号..."
+            if get_billing_accounts; then
+                echo "可用的结算账号列表："
+                for item in "${billing_account_array_display[@]}"; do
+                    echo "$item"
+                done
+            else
+                echo "无法获取结算账号列表。"
+            fi
+            echo "按任意键返回菜单..."
+            read -e -r -n 1
+            ;;
         3)
             echo "正在查看所有账号..."
             account_data=$(get_account_list)
@@ -535,6 +562,19 @@ while true; do
                 continue
             fi
             show_account_menu "$account_data"
+            echo "按任意键返回菜单..."
+            read -e -r -n 1
+            ;;
+        16)
+            echo "正在查看所有可用的结算账号..."
+            if get_billing_accounts; then
+                echo "可用的结算账号列表："
+                for item in "${billing_account_array_display[@]}"; do
+                    echo "$item"
+                done
+            else
+                echo "无法获取结算账号列表。"
+            fi
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
@@ -572,6 +612,19 @@ while true; do
                 fi
             else
                 echo "无效选项，操作取消。"
+            fi
+            echo "按任意键返回菜单..."
+            read -e -r -n 1
+            ;;
+        16)
+            echo "正在查看所有可用的结算账号..."
+            if get_billing_accounts; then
+                echo "可用的结算账号列表："
+                for item in "${billing_account_array_display[@]}"; do
+                    echo "$item"
+                done
+            else
+                echo "无法获取结算账号列表。"
             fi
             echo "按任意键返回菜单..."
             read -e -r -n 1
@@ -712,6 +765,19 @@ while true; do
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
+        16)
+            echo "正在查看所有可用的结算账号..."
+            if get_billing_accounts; then
+                echo "可用的结算账号列表："
+                for item in "${billing_account_array_display[@]}"; do
+                    echo "$item"
+                done
+            else
+                echo "无法获取结算账号列表。"
+            fi
+            echo "按任意键返回菜单..."
+            read -e -r -n 1
+            ;;
         6)
             echo "正在删除项目..."
             project_data=$(get_project_list)
@@ -798,6 +864,19 @@ while true; do
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
+        16)
+            echo "正在查看所有可用的结算账号..."
+            if get_billing_accounts; then
+                echo "可用的结算账号列表："
+                for item in "${billing_account_array_display[@]}"; do
+                    echo "$item"
+                done
+            else
+                echo "无法获取结算账号列表。"
+            fi
+            echo "按任意键返回菜单..."
+            read -e -r -n 1
+            ;;
         7)
             echo "正在查看所有项目..."
             project_data=$(get_project_list)
@@ -807,6 +886,19 @@ while true; do
                 continue
             fi
             show_project_menu "$project_data"
+            echo "按任意键返回菜单..."
+            read -e -r -n 1
+            ;;
+        16)
+            echo "正在查看所有可用的结算账号..."
+            if get_billing_accounts; then
+                echo "可用的结算账号列表："
+                for item in "${billing_account_array_display[@]}"; do
+                    echo "$item"
+                done
+            else
+                echo "无法获取结算账号列表。"
+            fi
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
@@ -848,6 +940,19 @@ while true; do
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
+        16)
+            echo "正在查看所有可用的结算账号..."
+            if get_billing_accounts; then
+                echo "可用的结算账号列表："
+                for item in "${billing_account_array_display[@]}"; do
+                    echo "$item"
+                done
+            else
+                echo "无法获取结算账号列表。"
+            fi
+            echo "按任意键返回菜单..."
+            read -e -r -n 1
+            ;;
         9)
             echo "正在查看虚拟机列表..."
             current_project=$(gcloud config get-value project)
@@ -865,6 +970,19 @@ while true; do
                 continue
             fi
             show_instance_menu "$instance_data"
+            echo "按任意键返回菜单..."
+            read -e -r -n 1
+            ;;
+        16)
+            echo "正在查看所有可用的结算账号..."
+            if get_billing_accounts; then
+                echo "可用的结算账号列表："
+                for item in "${billing_account_array_display[@]}"; do
+                    echo "$item"
+                done
+            else
+                echo "无法获取结算账号列表。"
+            fi
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
@@ -1182,6 +1300,19 @@ while true; do
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
+        16)
+            echo "正在查看所有可用的结算账号..."
+            if get_billing_accounts; then
+                echo "可用的结算账号列表："
+                for item in "${billing_account_array_display[@]}"; do
+                    echo "$item"
+                done
+            else
+                echo "无法获取结算账号列表。"
+            fi
+            echo "按任意键返回菜单..."
+            read -e -r -n 1
+            ;;
         11)
             echo "正在删除虚拟机..."
             current_project=$(gcloud config get-value project)
@@ -1287,6 +1418,19 @@ while true; do
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
+        16)
+            echo "正在查看所有可用的结算账号..."
+            if get_billing_accounts; then
+                echo "可用的结算账号列表："
+                for item in "${billing_account_array_display[@]}"; do
+                    echo "$item"
+                done
+            else
+                echo "无法获取结算账号列表。"
+            fi
+            echo "按任意键返回菜单..."
+            read -e -r -n 1
+            ;;
          12)
             echo "正在查看当前项目下所有实例的 socks5 配置..."
             current_project=$(gcloud config get-value project)
@@ -1385,6 +1529,19 @@ while true; do
                 fi
                 echo "----------------------------------------"
             done
+            echo "按任意键返回菜单..."
+            read -e -r -n 1
+            ;;
+        16)
+            echo "正在查看所有可用的结算账号..."
+            if get_billing_accounts; then
+                echo "可用的结算账号列表："
+                for item in "${billing_account_array_display[@]}"; do
+                    echo "$item"
+                done
+            else
+                echo "无法获取结算账号列表。"
+            fi
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
@@ -1592,6 +1749,19 @@ while true; do
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
+        16)
+            echo "正在查看所有可用的结算账号..."
+            if get_billing_accounts; then
+                echo "可用的结算账号列表："
+                for item in "${billing_account_array_display[@]}"; do
+                    echo "$item"
+                done
+            else
+                echo "无法获取结算账号列表。"
+            fi
+            echo "按任意键返回菜单..."
+            read -e -r -n 1
+            ;;
         15)
             echo "正在准备删除防火墙规则..."
             current_project=$(gcloud config get-value project)
@@ -1644,6 +1814,19 @@ while true; do
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
+        16)
+            echo "正在查看所有可用的结算账号..."
+            if get_billing_accounts; then
+                echo "可用的结算账号列表："
+                for item in "${billing_account_array_display[@]}"; do
+                    echo "$item"
+                done
+            else
+                echo "无法获取结算账号列表。"
+            fi
+            echo "按任意键返回菜单..."
+            read -e -r -n 1
+            ;;
 
         0)
             echo "退出脚本..."
@@ -1651,6 +1834,19 @@ while true; do
             ;;
         *)
             echo "无效选项，请选择 0-12 之间的数字。"
+            echo "按任意键返回菜单..."
+            read -e -r -n 1
+            ;;
+        16)
+            echo "正在查看所有可用的结算账号..."
+            if get_billing_accounts; then
+                echo "可用的结算账号列表："
+                for item in "${billing_account_array_display[@]}"; do
+                    echo "$item"
+                done
+            else
+                echo "无法获取结算账号列表。"
+            fi
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;

@@ -246,8 +246,8 @@ show_instance_menu() {
         if [ -n "$instance_name" ] && [ -n "$instance_zone" ]; then
             region=$(echo "$instance_zone" | sed 's/-[a-z]$//')
             location=${region_location_map["$region"]}
-            if [ -n "$location" ]; then
-                echo "$i. $instance_name (区域: $instance_zone（$location）)"
+             if [ -n "$location" ]; then
+                echo "$i. $instance_name (区域: $instance_zone - $location)"
             else
                 echo "$i. $instance_name (区域: $instance_zone)"
             fi
@@ -423,6 +423,53 @@ show_billing_account_menu() {
     echo "请输入选项 (1-${#billing_account_array_ids[@]}, m, 或 0):"
     return 0
 }
+# 定义区域到地理位置的映射
+declare -A region_location_map
+region_location_map["africa-south1"]="南非约翰内斯堡"
+region_location_map["us-central1"]="美国爱荷华州"
+region_location_map["us-east1"]="美国南卡罗来纳州"
+region_location_map["us-east4"]="美国弗吉尼亚州北部"
+region_location_map["us-east5"]="美国俄亥俄州"
+region_location_map["us-east7"]="美国弗吉尼亚州"
+region_location_map["us-west1"]="美国俄勒冈州"
+region_location_map["us-west2"]="美国洛杉矶"
+region_location_map["us-west3"]="美国盐湖城"
+region_location_map["us-west4"]="美国拉斯维加斯"
+region_location_map["us-west8"]="美国萨克拉门托"
+region_location_map["us-south1"]="美国达拉斯"
+region_location_map["europe-central2"]="波兰华沙"
+region_location_map["europe-north1"]="芬兰哈米纳"
+region_location_map["europe-north2"]="挪威奥斯陆"
+region_location_map["europe-southwest1"]="西班牙马德里"
+region_location_map["europe-west1"]="比利时圣吉斯兰"
+region_location_map["europe-west2"]="英国伦敦"
+region_location_map["europe-west3"]="德国法兰克福"
+region_location_map["europe-west4"]="荷兰埃姆斯哈文"
+region_location_map["europe-west6"]="瑞士苏黎世"
+region_location_map["europe-west8"]="意大利米兰"
+region_location_map["europe-west9"]="法国巴黎"
+region_location_map["europe-west10"]="德国柏林"
+region_location_map["europe-west12"]="意大利都灵"
+region_location_map["asia-east1"]="中国台湾彰化县"
+region_location_map["asia-east2"]="中国香港"
+region_location_map["asia-northeast1"]="日本东京"
+region_location_map["asia-northeast2"]="日本大阪"
+region_location_map["asia-northeast3"]="韩国首尔"
+region_location_map["asia-south1"]="印度孟买"
+region_location_map["asia-south2"]="印度德里"
+region_location_map["asia-southeast1"]="新加坡"
+region_location_map["asia-southeast2"]="印度尼西亚雅加达"
+region_location_map["australia-southeast1"]="澳大利亚悉尼"
+region_location_map["australia-southeast2"]="澳大利亚墨尔本"
+region_location_map["southamerica-east1"]="巴西圣保罗"
+region_location_map["southamerica-west1"]="智利圣地亚哥"
+region_location_map["northamerica-northeast1"]="加拿大蒙特利尔"
+region_location_map["northamerica-northeast2"]="加拿大多伦多"
+region_location_map["northamerica-south1"]="墨西哥城"
+region_location_map["me-central1"]="卡塔尔多哈"
+region_location_map["me-central2"]="沙特阿拉伯达曼"
+region_location_map["me-west1"]="以色列特拉维夫"
+
 # 主循环
 while true; do
     show_menu
@@ -1046,13 +1093,7 @@ while true; do
                 read -e -r -n 1
                 continue
             fi
-            # 定义区域到地理位置的映射
-            declare -A region_location_map
-            region_location_map["africa-south1"]="南非约翰内斯堡"
-            region_location_map["us-central1"]="美国爱荷华州"
-            region_location_map["us-east1"]="美国南卡罗来纳州"
-            region_location_map["us-east4"]="美国弗吉尼亚州北部"
-            region_location_map["us-east5"]="美国俄亥俄州"
+
             region_location_map["us-east7"]="美国弗吉尼亚州"
             region_location_map["us-west1"]="美国俄勒冈州"
             region_location_map["us-west2"]="美国加利福尼亚州洛杉矶"
@@ -1448,13 +1489,7 @@ while true; do
                 continue
             fi
 
-            # 定义区域到地理位置的映射
-            declare -A region_location_map
-            region_location_map["africa-south1"]="南非约翰内斯堡"
-            region_location_map["us-central1"]="美国爱荷华州"
-            region_location_map["us-east1"]="美国南卡罗来纳州"
-            region_location_map["us-east4"]="美国弗吉尼亚州北部"
-            region_location_map["us-east5"]="美国俄亥俄州"
+
             region_location_map["us-east7"]="美国弗吉尼亚州"
             region_location_map["us-west1"]="美国俄勒冈州"
             region_location_map["us-west2"]="美国加利福尼亚州洛杉矶"

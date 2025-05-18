@@ -7,6 +7,8 @@
 融合各种工具
 ```shell
 bash <(wget -qO- https://github.com/Lsmoisu/Toolbox/raw/refs/heads/main/toolbox.sh)
+```
+```shell
 bash <(wget -qO- https://url.aaa.team/toolbox)
 ```
 
@@ -14,10 +16,14 @@ bash <(wget -qO- https://url.aaa.team/toolbox)
 ```shell
 sudo su root -c  "bash <(wget -qO- https://github.com/Lsmoisu/Toolbox/raw/refs/heads/main/
 enablesshandcreatesocks5.sh)"
+```
+```shell
 sudo su root -c  "bash <(wget -qO- https://url.aaa.team/socks5)"
 ```
 谷歌云管理工具
 ```shell
 bash <(wget -qO- https://github.com/Lsmoisu/Toolbox/raw/refs/heads/main/vps_manager.sh)
+```
+```shell
 bash <(wget -qO- https://url.aaa.team/gcpmanager)
 ```

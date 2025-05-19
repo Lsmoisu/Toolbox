@@ -479,7 +479,7 @@ while true; do
         1)
             echo "正在添加账号..."
             echo "请按照提示完成账号登录流程（浏览器将打开进行身份验证）："
-            gcloud auth login --no-browser
+            gcloud auth login --no-launch-browser
             if [ $? -eq 0 ]; then
                 echo "账号添加成功！"
             else

@@ -488,19 +488,6 @@ while true; do
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
-        16)
-            echo "正在查看所有可用的结算账号..."
-            if get_billing_accounts; then
-                echo "可用的结算账号列表："
-                for item in "${billing_account_array_display[@]}"; do
-                    echo "$item"
-                done
-            else
-                echo "无法获取结算账号列表。"
-            fi
-            echo "按任意键返回菜单..."
-            read -e -r -n 1
-            ;;
         2)
             echo "正在删除账号..."
             account_data=$(get_account_list)
@@ -587,19 +574,6 @@ while true; do
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
-        16)
-            echo "正在查看所有可用的结算账号..."
-            if get_billing_accounts; then
-                echo "可用的结算账号列表："
-                for item in "${billing_account_array_display[@]}"; do
-                    echo "$item"
-                done
-            else
-                echo "无法获取结算账号列表。"
-            fi
-            echo "按任意键返回菜单..."
-            read -e -r -n 1
-            ;;
         3)
             echo "正在查看所有账号..."
             account_data=$(get_account_list)
@@ -609,19 +583,6 @@ while true; do
                 continue
             fi
             show_account_menu "$account_data"
-            echo "按任意键返回菜单..."
-            read -e -r -n 1
-            ;;
-        16)
-            echo "正在查看所有可用的结算账号..."
-            if get_billing_accounts; then
-                echo "可用的结算账号列表："
-                for item in "${billing_account_array_display[@]}"; do
-                    echo "$item"
-                done
-            else
-                echo "无法获取结算账号列表。"
-            fi
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
@@ -659,19 +620,6 @@ while true; do
                 fi
             else
                 echo "无效选项，操作取消。"
-            fi
-            echo "按任意键返回菜单..."
-            read -e -r -n 1
-            ;;
-        16)
-            echo "正在查看所有可用的结算账号..."
-            if get_billing_accounts; then
-                echo "可用的结算账号列表："
-                for item in "${billing_account_array_display[@]}"; do
-                    echo "$item"
-                done
-            else
-                echo "无法获取结算账号列表。"
             fi
             echo "按任意键返回菜单..."
             read -e -r -n 1
@@ -812,19 +760,6 @@ while true; do
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
-        16)
-            echo "正在查看所有可用的结算账号..."
-            if get_billing_accounts; then
-                echo "可用的结算账号列表："
-                for item in "${billing_account_array_display[@]}"; do
-                    echo "$item"
-                done
-            else
-                echo "无法获取结算账号列表。"
-            fi
-            echo "按任意键返回菜单..."
-            read -e -r -n 1
-            ;;
         6)
             echo "正在删除项目..."
             project_data=$(get_project_list)
@@ -911,19 +846,6 @@ while true; do
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
-        16)
-            echo "正在查看所有可用的结算账号..."
-            if get_billing_accounts; then
-                echo "可用的结算账号列表："
-                for item in "${billing_account_array_display[@]}"; do
-                    echo "$item"
-                done
-            else
-                echo "无法获取结算账号列表。"
-            fi
-            echo "按任意键返回菜单..."
-            read -e -r -n 1
-            ;;
         7)
             echo "正在查看所有项目..."
             project_data=$(get_project_list)
@@ -933,19 +855,6 @@ while true; do
                 continue
             fi
             show_project_menu "$project_data"
-            echo "按任意键返回菜单..."
-            read -e -r -n 1
-            ;;
-        16)
-            echo "正在查看所有可用的结算账号..."
-            if get_billing_accounts; then
-                echo "可用的结算账号列表："
-                for item in "${billing_account_array_display[@]}"; do
-                    echo "$item"
-                done
-            else
-                echo "无法获取结算账号列表。"
-            fi
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
@@ -987,19 +896,6 @@ while true; do
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
-        16)
-            echo "正在查看所有可用的结算账号..."
-            if get_billing_accounts; then
-                echo "可用的结算账号列表："
-                for item in "${billing_account_array_display[@]}"; do
-                    echo "$item"
-                done
-            else
-                echo "无法获取结算账号列表。"
-            fi
-            echo "按任意键返回菜单..."
-            read -e -r -n 1
-            ;;
         9)
             echo "正在查看虚拟机列表..."
             current_project=$(gcloud config get-value project)
@@ -1017,19 +913,6 @@ while true; do
                 continue
             fi
             show_instance_menu "$instance_data"
-            echo "按任意键返回菜单..."
-            read -e -r -n 1
-            ;;
-        16)
-            echo "正在查看所有可用的结算账号..."
-            if get_billing_accounts; then
-                echo "可用的结算账号列表："
-                for item in "${billing_account_array_display[@]}"; do
-                    echo "$item"
-                done
-            else
-                echo "无法获取结算账号列表。"
-            fi
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
@@ -1054,46 +937,61 @@ while true; do
                 continue
             fi
             # 下载启动脚本
-            echo "正在从远程地址下载启动脚本..."
-            script_url="https://github.com/Lsmoisu/Toolbox/raw/refs/heads/main/enablesshandcreatesocks5.sh"
-            if ! command -v curl &> /dev/null; then
-                echo "curl 未安装，尝试安装..."
-                if command -v apt-get &> /dev/null; then
-                    sudo apt-get update && sudo apt-get install -y curl
-                elif command -v yum &> /dev/null; then
-                    sudo yum install -y curl
-                else
-                    echo "无法安装 curl，请手动安装后重试。"
-                    echo "按任意键返回菜单..."
-                    read -e -r -n 1
-                    continue
-                fi
-            fi
-            
-            # 使用 -L 参数跟随重定向，-sS 减少输出，-f 失败时返回错误码
-            if curl -L -sS -f -o startup-script.sh "$script_url"; then
-                echo "启动脚本下载成功！"
-                # 检查文件是否为空
-                if [ -s startup-script.sh ]; then
-                    echo "脚本内容非空，下载验证通过。"
-                    chmod +x startup-script.sh
-                else
-                    echo "错误：下载的脚本文件为空，请检查URL内容或网络连接。"
-                    rm -f startup-script.sh
-                    echo "按任意键返回菜单..."
-                    read -e -r -n 1
-                    continue
-                fi
-            else
-                echo "启动脚本下载失败，请检查网络连接或URL是否正确。"
-                echo "错误信息："
-                curl -L -sS "$script_url" -o /dev/null -w "%{http_code}\n"
-                rm -f startup-script.sh
-                echo "按任意键返回菜单..."
-                read -e -r -n 1
-                continue
-            fi
+#            echo "正在从远程地址下载启动脚本..."
+#            script_url="https://github.com/Lsmoisu/Toolbox/raw/refs/heads/main/#enablesshandcreatesocks5.sh"
+#            if ! command -v curl &> /dev/null; then
+#                echo "curl 未安装，尝试安装..."
+#                if command -v apt-get &> /dev/null; then
+#                    sudo apt-get update && sudo apt-get install -y curl
+#                elif command -v yum &> /dev/null; then
+#                    sudo yum install -y curl
+#                else
+#                    echo "无法安装 curl，请手动安装后重试。"
+#                    echo "按任意键返回菜单..."
+#                    read -e -r -n 1
+#                    continue
+#                fi
+#            fi
+#            
+#            # 使用 -L 参数跟随重定向，-sS 减少输出，-f 失败时返回错误码
+#            if curl -L -sS -f -o startup-script.sh "$script_url"; then
+#                echo "启动脚本下载成功！"
+#                # 检查文件是否为空
+#                if [ -s startup-script.sh ]; then
+#                    echo "脚本内容非空，下载验证通过。"
+#                    chmod +x startup-script.sh
+#                else
+#                    echo "错误：下载的脚本文件为空，请检查URL内容或网络连接。"
+#                    rm -f startup-script.sh
+#                    echo "按任意键返回菜单..."
+#                    read -e -r -n 1
+#                    continue
+#                fi
+#            else
+#                echo "启动脚本下载失败，请检查网络连接或URL是否正确。"
+#                echo "错误信息："
+#                curl -L -sS "$script_url" -o /dev/null -w "%{http_code}\n"
+#                rm -f startup-script.sh
+#                echo "按任意键返回菜单..."
+#                read -e -r -n 1
+#                continue
+#            fi
 
+                #检测初始化脚本
+                if [ ! -f "/opt/gcloud/startup-script.sh" ]; then
+                    echo "未找到初始化脚本 startup-script.sh，请确保脚本位于当前目录。"
+                    echo "按任意键返回菜单..."
+                    read -e -r -n 1
+                fi
+                if [ -s /opt/gcloud/startup-script.sh ]; then
+                    echo "脚本内容非空，验证通过。"
+                    chmod +x /opt/gcloud/startup-script.sh
+                else
+                    echo "错误：初始化脚本检查失败，请检查/opt/gcloud/startup-script.sh"
+                    echo "按任意键返回菜单..."
+                    read -e -r -n 1
+                    continue
+                fi
             region_location_map["us-east7"]="美国弗吉尼亚州"
             region_location_map["us-west1"]="美国俄勒冈州"
             region_location_map["us-west2"]="美国加利福尼亚州洛杉矶"
@@ -1320,8 +1218,7 @@ while true; do
                     --zone="$zone" \
                     --machine-type=e2-micro \
                     --network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=default \
-                    --metadata ssh-keys=root:ssh-rsa\ AAAAB3NzaC1yc2EAAAADAQABAAABgQDVw/Lamb8wHXeLgCKGbumrocMvq+a6goVFBAuhYk/TVUoislrO1SrrH5YMFc7aQMZNP/mbubirIck8h0wT8hiU070OHO7HuaAyIGgFh4icIX/m7znhvWteG/evxJUN95ZWm4bk+UmGUbbAO4BkSEGub/ENJ3RGR9eJuDabgMha5fyzl9J9sm6jDeXVyGtLOy9NkYYHo/J0kUAwK1YOQ88rAXIhsJ04qsH7256VAdo6enO39Y0RG4NhK3hlRYP46f8NWyCaJFbcz4tpbHNdG9Xbqg7j/RSn7tO5bpB283m/wsZR7kM28x9dzyojJJYycEn9CTUzBjxcBBuKNa57Y+eoBo7q2KXx13ziMvO5k7Bl8GXknl0uguf49hjbPS95CThns+sqz7G3Px8a79BJ1rHEewlmMMJUa/kRY+NAcum0nVkWzZIpR6I2KWMP+8OaJLj97vIHgGydRP8y4I6IiiZBlOlshNJ3iI/XxsSWjWjdWxSHUZtHj4L1IaxclrX+QtU=\ root@gc-hk.asia-east2-c.c.annular-bucksaw-448504-h3.internal \
-                    --metadata-from-file startup-script=startup-script.sh \
+                    --metadata-from-file startup-script=/opt/gcloud/startup-script.sh \
                     --maintenance-policy=MIGRATE \
                     --provisioning-model=STANDARD \
                     --scopes=https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/trace.append \
@@ -1338,19 +1235,6 @@ while true; do
                     echo "第 $i 台虚拟机 $instance_name 创建失败，请检查错误信息。"
                 fi
             done
-            echo "按任意键返回菜单..."
-            read -e -r -n 1
-            ;;
-        16)
-            echo "正在查看所有可用的结算账号..."
-            if get_billing_accounts; then
-                echo "可用的结算账号列表："
-                for item in "${billing_account_array_display[@]}"; do
-                    echo "$item"
-                done
-            else
-                echo "无法获取结算账号列表。"
-            fi
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
@@ -1459,19 +1343,6 @@ while true; do
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
-        16)
-            echo "正在查看所有可用的结算账号..."
-            if get_billing_accounts; then
-                echo "可用的结算账号列表："
-                for item in "${billing_account_array_display[@]}"; do
-                    echo "$item"
-                done
-            else
-                echo "无法获取结算账号列表。"
-            fi
-            echo "按任意键返回菜单..."
-            read -e -r -n 1
-            ;;
          12)
             echo "正在查看当前项目下所有实例的 socks5 配置..."
             current_project=$(gcloud config get-value project)
@@ -1564,19 +1435,6 @@ while true; do
                 fi
                 echo "----------------------------------------"
             done
-            echo "按任意键返回菜单..."
-            read -e -r -n 1
-            ;;
-        16)
-            echo "正在查看所有可用的结算账号..."
-            if get_billing_accounts; then
-                echo "可用的结算账号列表："
-                for item in "${billing_account_array_display[@]}"; do
-                    echo "$item"
-                done
-            else
-                echo "无法获取结算账号列表。"
-            fi
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
@@ -1784,19 +1642,6 @@ while true; do
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;
-        16)
-            echo "正在查看所有可用的结算账号..."
-            if get_billing_accounts; then
-                echo "可用的结算账号列表："
-                for item in "${billing_account_array_display[@]}"; do
-                    echo "$item"
-                done
-            else
-                echo "无法获取结算账号列表。"
-            fi
-            echo "按任意键返回菜单..."
-            read -e -r -n 1
-            ;;
         15)
             echo "正在准备删除防火墙规则..."
             current_project=$(gcloud config get-value project)
@@ -1850,7 +1695,6 @@ while true; do
             read -e -r -n 1
             ;;
         16)
-            echo "正在查看所有可用的结算账号..."
             if get_billing_accounts; then
                 echo "可用的结算账号列表："
                 for item in "${billing_account_array_display[@]}"; do
@@ -1869,19 +1713,6 @@ while true; do
             ;;
         *)
             echo "无效选项，请选择 0-12 之间的数字。"
-            echo "按任意键返回菜单..."
-            read -e -r -n 1
-            ;;
-        16)
-            echo "正在查看所有可用的结算账号..."
-            if get_billing_accounts; then
-                echo "可用的结算账号列表："
-                for item in "${billing_account_array_display[@]}"; do
-                    echo "$item"
-                done
-            else
-                echo "无法获取结算账号列表。"
-            fi
             echo "按任意键返回菜单..."
             read -e -r -n 1
             ;;

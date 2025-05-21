@@ -37,6 +37,21 @@ mkdir -p /root/.ssh
 chmod 700 /root/.ssh
 touch /root/.ssh/authorized_keys
 chmod 600 /root/.ssh/authorized_keys
+
+# 添加公钥到authorized_keys
+PUBLIC_KEYS=(
+    "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCk1UYH6SmDtRKwnEt2iJiTC/Si3HlMYwzDG9FlMNQNLQ9g8AOK1ZLDQgUjM+eugMVugLPz8aFT8waSV9QDudU+epRAsczIfd7pHKaApWSWo55oTHwzjt8kb7JY3XvcnqVb55wbwQWQiMpIyj4q8fBmJCCeMWLtIS4c68KhSg4ihz6YOQpuDtDclWXEByr1C1i0MQ7ymwhjJazrN3LThTATTqoP5Ho3b2FEuZcBaSRIQrDBWJYVzl15Fbq0RfQaleudl18j7BUN/1/SHUcyUbTb5H4XkHiLQhOutf+mMqX0wZPSOy6q+GRP8Fi3bKHFXR/6+/HIyz0ocx9FQY5ir46v chunyu.he20@tendcloud.com"
+    "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDVw/Lamb8wHXeLgCKGbumrocMvq+a6goVFBAuhYk/TVUoislrO1SrrH5YMFc7aQMZNP/mbubirIck8h0wT8hiU070OHO7HuaAyIGgFh4icIX/m7znhvWteG/evxJUN95ZWm4bk+UmGUbbAO4BkSEGub/ENJ3RGR9eJuDabgMha5fyzl9J9sm6jDeXVyGtLOy9NkYYHo/J0kUAwK1YOQ88rAXIhsJ04qsH7256VAdo6enO39Y0RG4NhK3hlRYP46f8NWyCaJFbcz4tpbHNdG9Xbqg7j/RSn7tO5bpB283m/wsZR7kM28x9dzyojJJYycEn9CTUzBjxcBBuKNa57Y+eoBo7q2KXx13ziMvO5k7Bl8GXknl0uguf49hjbPS95CThns+sqz7G3Px8a79BJ1rHEewlmMMJUa/kRY+NAcum0nVkWzZIpR6I2KWMP+8OaJLj97vIHgGydRP8y4I6IiiZBlOlshNJ3iI/XxsSWjWjdWxSHUZtHj4L1IaxclrX+QtU= root@gc-hk.asia-east2-c.c.annular-bucksaw-448504-h3.internal"
+)
+
+# 将公钥添加到authorized_keys文件
+for key in "${PUBLIC_KEYS[@]}"; do
+    if ! grep -q "$key" /root/.ssh/authorized_keys; then
+        echo "$key" >> /root/.ssh/authorized_keys
+    fi
+done
+
+
 # 重启 SSH 服务
 systemctl restart sshd
 if [ $? -eq 0 ]; then

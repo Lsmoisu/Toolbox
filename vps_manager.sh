@@ -978,6 +978,7 @@ while true; do
 #            fi
 
                 #检测初始化脚本
+                echo "正在检查初始化脚本..."
                 if [ ! -f "/opt/gcloud/startup-script.sh" ]; then
                     echo "未找到初始化脚本 startup-script.sh，请确保脚本位于当前目录。"
                     echo "按任意键返回菜单..."
